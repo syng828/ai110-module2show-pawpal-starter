@@ -1,15 +1,94 @@
 # PawPal+ Project Reflection
 
 ## 1. System Design
+The initial actions would be to add a pet, schedule a walk, and see today's tasks.
 
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+There would be a Pet class:
+Attributes: name, species, age, breed, special needs
+Methods: add_special_needs
+
+Owner class: 
+Attributes: name, available minutes, preferred start time, list of pets
+Methods: add_pet, get_total_time
+
+Task class:
+Attributes: title, duration, priority, category, is_required
+Methods: priority_score 
+
+ScheduledTask class: 
+Attributes: task, start, end, reason
+Methods: duration
+
+## To be used later
+classDiagram
+    class Pet {
+        +String name
+        +String species
+        +int age
+        +String breed
+        +List~String~ special_needs
+        +add_special_need(need: String)
+        +__repr__() String
+    }
+
+    class Owner {
+        +String name
+        +int available_minutes
+        +String preferred_start_time
+        +List~Pet~ pets
+        +add_pet(pet: Pet)
+        +get_total_available_time() int
+    }
+
+    class Task {
+        +String title
+        +int duration_minutes
+        +String priority
+        +String category
+        +bool is_required
+        +String time_of_day
+        +priority_score() int
+        +__repr__() String
+    }
+
+    class ScheduledTask {
+        +Task task
+        +String start_time
+        +String end_time
+        +String reason
+        +duration() int
+        +to_dict() dict
+    }
+
+    class Scheduler {
+        +Owner owner
+        +Pet pet
+        +List~Task~ tasks
+        +add_task(task: Task)
+        +generate_plan() List~ScheduledTask~
+        +explain_plan(plan: List) String
+        +total_scheduled_minutes(plan) int
+    }
+
+    Owner "1" --> "1..*" Pet : has
+    Owner "1" --> "1" Scheduler : uses
+    Scheduler "1" --> "0..*" Task : manages
+    Scheduler "1" --> "0..*" ScheduledTask : produces
+    ScheduledTask "1" --> "1" Task : wraps
+##
 - What classes did you include, and what responsibilities did you assign to each?
+I included a Pet class, which is responsible for describing the pet and also add methods like add_special_need.
+There is also the Owner class, responsible for describing the owner and it also contains a list of Pets which could be added as well as to get the available time.
+There is the Task class which represents the tasks related to pet care and includes methods like getting the priority score.
+Lastly, there is the Scheduler class which contains a task and contains the duration.
 
 **b. Design changes**
 
 - Did your design change during implementation?
+There is not much design change by AI but it did write down the function logic.
 - If yes, describe at least one change and why you made it.
 
 ---
