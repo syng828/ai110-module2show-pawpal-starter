@@ -12,11 +12,16 @@ if __name__ == "__main__":
     today = date.today().strftime("%Y-%m-%d")
     task1 = pawpal.Task("Feed Mochi", f"{today} 9:00 AM", "daily")
     task2 = pawpal.Task("Walk Momoko", f"{today} 10:00 AM", "daily")
-    task3 = pawpal.Task("Play with Mochi", f"{today} 2:00 PM", "daily")
+    task4 = pawpal.Task("Play with Momoko", f"{today} 3:00 PM", "daily")
+    task3 = pawpal.Task("Play with Mochi", f"{today} 10:00 AM", "daily")
 
+    dog.add_task(task4)
     cat.add_task(task1)
     dog.add_task(task2)
     cat.add_task(task3)
 
     scheduler = pawpal.Scheduler(owner)
+    warnings = scheduler.detect_time_conflicts()
+    for warning in warnings:
+        print(warning)
     print(scheduler.schedule())

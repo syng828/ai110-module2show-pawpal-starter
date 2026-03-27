@@ -100,10 +100,30 @@ There is not much design change by AI but it did write down the function logic.
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+The scheduler currently considers three main constraints: task completion status, scheduled datetime, and recurrence frequency.
+
+- Completion status: completed tasks are excluded from the generated daily schedule.
+- Time: scheduled tasks are ordered chronologically, and tasks without a specific datetime are placed after scheduled tasks.
+- Frequency: daily and weekly tasks automatically create the next occurrence when marked complete.
+
+I prioritized these constraints because they directly affect whether the owner can follow a plan in real time.
+
+- First priority was correctness of "what still needs to be done" (pending tasks only).
+- Second was practical execution order (time-based sorting).
+- Third was consistency over multiple days (recurring tasks).
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+One tradeoff is that conflict detection is lightweight: it only flags tasks with the exact same scheduled datetime and returns warnings instead of trying to auto-reschedule.
+
+This tradeoff is reasonable for this scenario because it keeps the system simple, readable, and safe for early development.
+
+- The owner still gets clear warnings about conflicts.
+- The app avoids hidden automatic changes that could surprise the user.
+- It leaves room for a future "smart rescheduling" feature once core reliability is stable.
 
 ---
 

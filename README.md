@@ -41,3 +41,16 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Smarter Scheduling
+
+Recent improvements added to the scheduler include:
+
+- `sort_by_time(...)`: Orders tasks by scheduled datetime first, then by duration for unscheduled tasks.
+- `filter_tasks(...)`: Filters tasks by completion status and/or pet name (case-insensitive pet matching).
+- Recurring task rollover: When a `daily` or `weekly` task is marked complete, a new future occurrence is auto-created.
+	- `daily` -> next due date is today + 1 day
+	- `weekly` -> next due date is today + 7 days
+- `detect_time_conflicts(...)`: Lightweight conflict detection that returns warning messages (instead of crashing) when two or more tasks share the same scheduled time.
+
+These changes make the app more practical for day-to-day pet care by improving task visibility, repeat scheduling, and schedule safety.
