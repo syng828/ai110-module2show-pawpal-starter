@@ -91,4 +91,4 @@ Latest result: `8 passed`.
 Confidence Level: `(4/5)`
 
 ## Demo
-<a href="/course_images/ai110/pawpal_ui.png" target="_blank"><img src='/course_images/ai110/pawpal_ui.png' /></a>
+<a href="pawpal_ui.png" target="_blank"><img src="pawpal_ui.png" /></a>
