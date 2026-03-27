@@ -10,6 +10,7 @@ if "owner" not in st.session_state:
     st.session_state.owner = pawpal.Owner(name="Jordan")
 
 owner = st.session_state.owner  # shorthand alias
+scheduler = pawpal.Scheduler(owner)
 
 # ── Owner ─────────────────────────────────────────────────────────────────────
 st.subheader("Owner")
@@ -51,35 +52,83 @@ else:
     with col4:
         frequency = st.selectbox("Frequency", ["daily", "weekly", "as needed"])
 
+    schedule_time = None
+    use_time = st.checkbox("Schedule at a specific time")
+    if use_time:
+        from datetime import date, datetime, time as dt_time
+        picked_time = st.time_input("Scheduled time", value=dt_time(8, 0))
+        today = date.today()
+        schedule_time = datetime.combine(today, picked_time)
+
     if st.button("Add task"):
         target_pet = next(p for p in owner.pets if p.name == selected_pet)
-        new_task = pawpal.Task(
-            description=task_desc,
-            time_value=int(duration),
-            frequency=frequency,
-        )
+        if schedule_time is not None:
+            new_task = pawpal.Task(
+                description=task_desc,
+                time_value=schedule_time,
+                frequency=frequency,
+            )
+            new_task.time_minutes = int(duration)
+        else:
+            new_task = pawpal.Task(
+                description=task_desc,
+                time_value=int(duration),
+                frequency=frequency,
+            )
         # Phase-2 call: Pet.add_task()
         target_pet.add_task(new_task)
         st.success(f"Added '{task_desc}' to {selected_pet}.")
 
-    # Show all tasks grouped by pet
-    tasks_by_pet = pawpal.Scheduler(owner).get_tasks_by_pet()
-    if any(tasks_by_pet.values()):
-        st.write("Current tasks:")
-        for p_name, tasks in tasks_by_pet.items():
-            if tasks:
-                st.markdown(f"**{p_name}**")
-                st.table(
-                    [
-                        {
-                            "description": t.description,
-                            "duration (min)": t.time_minutes,
-                            "frequency": t.frequency,
-                            "status": "done" if t.is_completed else "pending",
-                        }
-                        for t in tasks
-                    ]
-                )
+    all_tasks = scheduler.retrieve_all_tasks()
+    if all_tasks:
+        st.write("Current tasks")
+
+        conflicts = scheduler.detect_time_conflicts(only_today=False)
+        if conflicts:
+            for warning in conflicts:
+                st.warning(warning)
+        else:
+            st.success("No scheduling conflicts detected.")
+
+        filter_col1, filter_col2 = st.columns(2)
+        with filter_col1:
+            status_filter = st.selectbox("Status filter", ["All", "Pending", "Completed"])
+        with filter_col2:
+            pet_filter = st.selectbox("Pet filter", ["All pets", *pet_names])
+
+        is_completed = None
+        if status_filter == "Pending":
+            is_completed = False
+        elif status_filter == "Completed":
+            is_completed = True
+
+        filtered_tasks = scheduler.filter_tasks(
+            is_completed=is_completed,
+            pet_name=None if pet_filter == "All pets" else pet_filter,
+        )
+        sorted_tasks = scheduler.sort_by_time(tasks=filtered_tasks)
+
+        task_owner_lookup = {}
+        for pet in owner.pets:
+            for task in pet.tasks:
+                task_owner_lookup[id(task)] = pet.name
+
+        if sorted_tasks:
+            st.table(
+                [
+                    {
+                        "pet": task_owner_lookup.get(id(task), "unknown"),
+                        "description": task.description,
+                        "scheduled": task.scheduled_for.strftime("%Y-%m-%d %I:%M %p") if task.scheduled_for else "unscheduled",
+                        "duration (min)": task.time_minutes if task.time_minutes is not None else "-",
+                        "frequency": task.frequency,
+                        "status": "done" if task.is_completed else "pending",
+                    }
+                    for task in sorted_tasks
+                ]
+            )
+        else:
+            st.info("No tasks match the selected filters.")
 
 # ── Generate Schedule ─────────────────────────────────────────────────────────
 st.divider()
@@ -89,6 +138,9 @@ if st.button("Generate schedule"):
     if not owner.pets or not owner.get_all_tasks():
         st.warning("Add at least one pet and one task first.")
     else:
+        for warning in scheduler.detect_time_conflicts():
+            st.warning(warning)
+
         # Phase-2 call: Scheduler.schedule()
-        result = pawpal.Scheduler(owner).schedule()
+        result = scheduler.schedule()
         st.text(result)

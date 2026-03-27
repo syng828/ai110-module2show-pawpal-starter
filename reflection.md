@@ -23,61 +23,59 @@ Attributes: task, start, end, reason
 Methods: duration
 
 ## To be used later
+```mermaid
 classDiagram
+    class Task {
+        +description: str
+        +time_minutes: int|None
+        +scheduled_for: datetime|None
+        +frequency: str
+        +is_completed: bool
+        +__init__(description, time_value, frequency, is_completed=False)
+        +_parse_time_value(time_value)
+        +mark_complete()
+        +mark_incomplete()
+        +__repr__()
+    }
+
     class Pet {
-        +String name
-        +String species
-        +int age
-        +String breed
-        +List~String~ special_needs
-        +add_special_need(need: String)
-        +__repr__() String
+        +name: str
+        +species: str
+        +age: int|None
+        +tasks: List~Task~
+        +add_task(task)
+        +get_pending_tasks()
+        +__repr__()
     }
 
     class Owner {
-        +String name
-        +int available_minutes
-        +String preferred_start_time
-        +List~Pet~ pets
-        +add_pet(pet: Pet)
-        +get_total_available_time() int
-    }
-
-    class Task {
-        +String title
-        +int duration_minutes
-        +String priority
-        +String category
-        +bool is_required
-        +String time_of_day
-        +priority_score() int
-        +__repr__() String
-    }
-
-    class ScheduledTask {
-        +Task task
-        +String start_time
-        +String end_time
-        +String reason
-        +duration() int
-        +to_dict() dict
+        +name: str
+        +pets: List~Pet~
+        +add_pet(pet)
+        +get_all_tasks()
+        +__repr__()
     }
 
     class Scheduler {
-        +Owner owner
-        +Pet pet
-        +List~Task~ tasks
-        +add_task(task: Task)
-        +generate_plan() List~ScheduledTask~
-        +explain_plan(plan: List) String
-        +total_scheduled_minutes(plan) int
+        +owner: Owner|None
+        +_resolve_owner(owner=None)
+        +retrieve_all_tasks(owner=None)
+        +retrieve_pending_tasks(owner=None)
+        +filter_tasks(owner=None, is_completed=None, pet_name=None)
+        +sort_by_time(tasks=None, owner=None, pending_only=False)
+        +organize_tasks(pending_first=True, owner=None)
+        +get_tasks_by_pet(owner=None)
+        +_find_task_pet(task, owner=None)
+        +_build_next_occurrence(task)
+        +mark_task_complete(task, owner=None)
+        +detect_time_conflicts(owner=None, only_today=True, include_completed=False)
+        +schedule(owner=None, only_today=True)
     }
 
-    Owner "1" --> "1..*" Pet : has
-    Owner "1" --> "1" Scheduler : uses
-    Scheduler "1" --> "0..*" Task : manages
-    Scheduler "1" --> "0..*" ScheduledTask : produces
-    ScheduledTask "1" --> "1" Task : wraps
+    Owner "1" --> "0..*" Pet : has
+    Pet "1" --> "0..*" Task : contains
+    Scheduler "1" --> "0..1" Owner : uses
+```
 ##
 - What classes did you include, and what responsibilities did you assign to each?
 I included a Pet class, which is responsible for describing the pet and also add methods like add_special_need.
