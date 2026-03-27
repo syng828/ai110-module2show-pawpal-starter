@@ -54,3 +54,21 @@ Recent improvements added to the scheduler include:
 - `detect_time_conflicts(...)`: Lightweight conflict detection that returns warning messages (instead of crashing) when two or more tasks share the same scheduled time.
 
 These changes make the app more practical for day-to-day pet care by improving task visibility, repeat scheduling, and schedule safety.
+
+## Testing PawPaL+
+Run all tests with:
+
+```bash
+python -m pytest
+```
+
+Test coverage includes:
+
+- Sorting correctness: verifies tasks are returned in chronological order.
+- Recurrence logic: verifies completing daily and weekly tasks creates the next occurrence.
+- Conflict detection: verifies duplicate scheduled times are flagged with warning messages.
+- Core task behavior: verifies marking tasks complete and adding tasks to pets.
+
+Latest result: `8 passed`.
+
+Confidence Level: `★★★★☆ (4/5)`
